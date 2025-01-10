@@ -1,23 +1,22 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth } from 'firebase/auth'
-import { getDatabase, ref, set } from "firebase/database";
+import { getAuth } from "firebase/auth";
+import { getDatabase } from "firebase/database";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyAh_7KoUkeqybCgYCH_561Rp1TOHjSg8Wk",
     authDomain: "mensajes-online-f6905.firebaseapp.com",
+    databaseURL: "https://mensajes-online-f6905-default-rtdb.firebaseio.com", // Añade la URL de la base de datos aquí
     projectId: "mensajes-online-f6905",
-    storageBucket: "mensajes-online-f6905.firebasestorage.app",
+    storageBucket: "mensajes-online-f6905.appspot.com", // Corregido, el dominio era incorrecto
     messagingSenderId: "203126916972",
-    appId: "1:203126916972:web:d9b74627c088d30dd9d549"
+    appId: "1:203126916972:web:d9b74627c088d30dd9d549",
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
+// Export Firebase services
 export const auth = getAuth(app);
-export const db = getDatabase(app)
+export const db = getDatabase(app);

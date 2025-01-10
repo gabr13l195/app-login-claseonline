@@ -1,4 +1,4 @@
-import { Alert, Button, StyleSheet, Text, View, TextInput } from 'react-native';
+import { Alert, Button, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../config/Config';
@@ -9,7 +9,7 @@ export default function LoginScreen({ navigation }: any) {
 
     function login() {
         signInWithEmailAndPassword(auth, correo, contraseña)
-            .then((userCredential) => {
+            .then(() => {
                 // Usuario autenticado con éxito
                 navigation.navigate('Welcome');
             })
@@ -38,6 +38,9 @@ export default function LoginScreen({ navigation }: any) {
                 secureTextEntry
             />
             <Button title="Login" onPress={login} />
+            <TouchableOpacity onPress={() => navigation.navigate('Registro')}>
+                <Text style={styles.linkText}>No tienes cuenta? Regístrate aquí</Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -62,5 +65,10 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         padding: 10,
         marginVertical: 10,
+    },
+    linkText: {
+        color: 'blue',
+        textAlign: 'center',
+        marginTop: 20,
     },
 });

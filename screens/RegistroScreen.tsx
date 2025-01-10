@@ -1,95 +1,133 @@
-import { Alert, Button, StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { TextInput } from 'react-native-gesture-handler'
-import { AuthErrorCodes, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { auth, db } from '../config/Config';
-import { getDatabase, ref, set } from "firebase/database";
+import { Alert, Button, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '../config/Config'; // Asegúrate de importar el `database` desde Firebase
+import { ref, set, get } from 'firebase/database'; // Métodos para interactuar con la base de datos
 
-export default function RegistroScreen() {
-    const [correo, setcorreo] = useState("")
-    const [contraseña, setcontraseña] = useState('')
-    const [edad, setedad] = useState(0)
-    const [ciudad, setciudad] = useState('')
-    const [cedula, setcedula] = useState('')
+export default function RegistroScreen({ navigation }: any) {
+    const [correo, setCorreo] = useState('');
+    const [contraseña, setContraseña] = useState('');
+    const [nombre, setNombre] = useState('');
+    const [edad, setEdad] = useState('');
+    const [ciudad, setCiudad] = useState('');
+    const [cedula, setCedula] = useState('');
 
-
-    useEffect(() => {
-        if(Number.isNaN(edad)){
-            setedad(0)
+    function registrar() {
+        if (!cedula || !nombre || !edad || !ciudad || !correo || !contraseña) {
+            Alert.alert('Error', 'Por favor completa todos los campos');
+            return;
         }
-    }, [edad])
 
-    function global (){
-        registro()
-        guardar()
-    }
-
-    function guardar() {
-        set(ref(db, 'usuarios' + cedula), {
-            email: correo,
-            age: edad,
-            city: ciudad,
-        });
-    }
-
-    function registro() {
-        createUserWithEmailAndPassword(auth, correo, contraseña)
-            .then((userCredential) => {
-                const user = userCredential.user;
-                Alert.alert('Exito', ' Se ha registrado el usuario')
+        // Verificar si la cédula ya está registrada en la base de datos
+        const cedulaRef = ref(db, `usuarios/${cedula}`);
+        get(cedulaRef)
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    Alert.alert('Error', 'La cédula ya está registrada');
+                    return;
+                } else {
+                    // Si no está registrada, crear el usuario con email y contraseña
+                    createUserWithEmailAndPassword(auth, correo, contraseña)
+                        .then((userCredential) => {
+                            const user = userCredential.user;
+                            // Guardar los datos del usuario con la cédula como clave
+                            set(ref(db, `usuarios/${cedula}`), {
+                                nombre,
+                                edad,
+                                ciudad,
+                                correo,
+                            });
+                            Alert.alert('Registro exitoso');
+                            navigation.navigate('Login'); // Redirigir al login después del registro
+                        })
+                        .catch((error) => {
+                            Alert.alert('Error', error.message);
+                        });
+                }
             })
             .catch((error) => {
-                const errorCode = error.Code;
-                const errorMessage = error.message;
-                Alert.alert(errorCode, errorMessage)
-            })
+                Alert.alert('Error', error.message);
+            });
     }
 
-
     return (
-        <View>
-            <Text>LoginScreen</Text>
+        <View style={styles.container}>
+            <Text style={styles.title}>Registro</Text>
             <TextInput
-                placeholder='Ingresar correo'
-                onChangeText={(texto) => setcorreo(texto)}
+                style={styles.input}
+                placeholder="Nombre"
+                onChangeText={(texto) => setNombre(texto)}
+                value={nombre}
             />
             <TextInput
-                placeholder='Ingresar contraseña'
-                onChangeText={(texto) => setcontraseña(texto)}
+                style={styles.input}
+                placeholder="Edad"
+                onChangeText={(texto) => setEdad(texto)}
+                value={edad}
+                keyboardType="numeric"
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Ciudad"
+                onChangeText={(texto) => setCiudad(texto)}
+                value={ciudad}
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Cédula"
+                onChangeText={(texto) => setCedula(texto)}
+                value={cedula}
+                keyboardType="numeric"
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Correo electrónico"
+                onChangeText={(texto) => setCorreo(texto)}
+                value={correo}
+                keyboardType="email-address"
+                autoCapitalize="none"
+            />
+            <TextInput
+                style={styles.input}
+                placeholder="Contraseña"
+                onChangeText={(texto) => setContraseña(texto)}
+                value={contraseña}
                 secureTextEntry
             />
-            <TextInput
-                placeholder='Ingresar edad'
-                onChangeText={(texto) => setedad(edad)}
-                value={edad.toString()}
-                keyboardType='numeric'
-            />
-            <TextInput
-                placeholder='Ingresar ciudad'
-                onChangeText={(texto) => setciudad(texto)}
-                style={styles.input}
-            />
-            <TextInput
-                placeholder='Ingresar cedula'
-                onChangeText={(texto) => setcedula(texto)}
-                style={styles.input}
-            />
-
-            <Button
-                title='Login'
-                onPress={() => global()}
-            />
-
+            <Button title="Registrar" onPress={registrar} />
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.linkText}>Ya tienes cuenta? Ingresa aquí</Text>
+            </TouchableOpacity>
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        padding: 20,
+        backgroundColor: '#fff',
+    },
+    title: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        marginBottom: 20,
+    },
     input: {
-        fontSize: 35,
-        backgroundColor: "#6666",
-        margin: 10,
-        borderRadius: 20,
-        paddingHorizontal: 2
-    }
-})
+        fontSize: 18,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        borderRadius: 8,
+        padding: 10,
+        marginVertical: 10,
+    },
+    linkText: {
+        marginTop: 20,
+        textAlign: 'center',
+        color: 'blue',
+        textDecorationLine: 'underline',
+    },
+});
+
