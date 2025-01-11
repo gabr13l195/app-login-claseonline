@@ -4,7 +4,7 @@ import { db } from '../config/Config';
 import { ref, get } from 'firebase/database';
 
 export default function WelcomeScreen({ route }: any) {
-    const { cedula } = route.params; // Recibimos la cédula desde la navegación
+    const { cedula } = route.params;
     const [usuario, setUsuario] = useState<any>(null);
 
     useEffect(() => {
@@ -24,9 +24,10 @@ export default function WelcomeScreen({ route }: any) {
 
     return (
         <View style={styles.container}>
+            <Text>Holaa</Text>
             {usuario ? (
                 <>
-                    <Text style={styles.text}>Bienvenido, {usuario.nombre}</Text>
+                    <Text style={styles.text}>Bienvenido/a, {usuario.nombre}</Text>
                     <Text style={styles.text}>Ciudad: {usuario.ciudad}</Text>
                     <Text style={styles.text}>Edad: {usuario.edad}</Text>
                     <Text style={styles.text}>Correo: {usuario.correo}</Text>
