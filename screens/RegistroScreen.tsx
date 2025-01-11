@@ -1,8 +1,8 @@
 import { Alert, Button, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth, db } from '../config/Config'; // Asegúrate de importar el `database` desde Firebase
-import { ref, set, get } from 'firebase/database'; // Métodos para interactuar con la base de datos
+import { auth, db } from '../config/Config';
+import { ref, set, get } from 'firebase/database'; 
 
 export default function RegistroScreen({ navigation }: any) {
     const [correo, setCorreo] = useState('');

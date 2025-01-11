@@ -1,7 +1,8 @@
 import { Alert, Button, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../config/Config';
+import { auth, db } from '../config/Config';
+import { ref, get } from 'firebase/database';
 
 export default function LoginScreen({ navigation }: any) {
     const [correo, setCorreo] = useState('');
@@ -10,11 +11,31 @@ export default function LoginScreen({ navigation }: any) {
     function login() {
         signInWithEmailAndPassword(auth, correo, contraseña)
             .then(() => {
-                // Usuario autenticado con éxito
-                navigation.navigate('Welcome');
+                // Buscar usuario por correo en la base de datos
+                const usuariosRef = ref(db, 'usuarios');
+                get(usuariosRef)
+                    .then((snapshot) => {
+                        if (snapshot.exists()) {
+                            const usuarios = snapshot.val();
+                            const cedulaUsuario = Object.keys(usuarios).find(
+                                (cedula) => usuarios[cedula].correo === correo
+                            );
+
+                            if (cedulaUsuario) {
+                                // Navegar a WelcomeScreen con la cédula
+                                navigation.navigate('Welcome', { cedula: cedulaUsuario });
+                            } else {
+                                Alert.alert('Error', 'No se encontró la cédula del usuario.');
+                            }
+                        } else {
+                            Alert.alert('Error', 'No hay usuarios registrados.');
+                        }
+                    })
+                    .catch((error) => {
+                        Alert.alert('Error', error.message);
+                    });
             })
             .catch((error) => {
-                // Manejar errores de autenticación
                 Alert.alert('Error', error.message);
             });
     }
